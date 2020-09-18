@@ -1,0 +1,110 @@
+<?php 
+
+	session_start();
+
+	if($_SESSION['rol'] != 1 and $_SESSION['rol'] != 2)
+	{
+		header("location: ./");
+	}
+
+	include "../conexao.php";
+
+	if(!empty($_POST))
+	{
+
+		$alert='';
+		if(empty($_POST['proveedor']) || empty($_POST['produto']) || empty($_POST['preco']) || empty($_POST['quantidade']))
+		{
+			$alert='<p class="msg_error">Todos os campos  são obrigatorios.</p>';
+		}else{
+
+			$proveedor  = $_POST['proveedor'];
+			$produto = $_POST['produto'];
+			$preco = $_POST['preco'];
+			$quantidade = $_POST['quantidade'];
+			$usuario_id = $_SESSION['idUser'];
+
+			$query_insert = mysqli_query($conexao,"INSERT INTO produto
+											(proveedor,descricao,preco,existencia,usuario_id,foto) VALUES
+											('$proveedor','$produto','$preco','$quantidade','$usuario_id')");
+
+			if($query_insert){
+				$alert='<p class="msg_save">Produto guardado corretamente.</p>';
+			}else{
+				$alert='<p class="msg_error">Erro ao guardar produto.</p>';
+			}
+		}
+	}
+ ?>
+
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<?php include "includes/scripts.php" ?>
+	<title>Registro Produto</title>
+</head>
+<body>
+	<?php include "includes/header.php" ?>
+
+	<section id="container">
+		
+		<div class="form_register">
+			<h1>Registro produtos</h1>
+			<hr>
+			<div class="alert"><?php echo isset($alert) ? $alert : ''; ?></div>
+
+			<form action="" method="POST" enctype="multipart/form-data">
+
+			<label for="proveedor">Provedor</label>
+
+			<?php 
+
+				$query_provedor = mysqli_query($conexao,"SELECT codproveedor, proveedor FROM proveedor WHERE estatus = 1 ORDER BY proveedor ASC");
+
+				$result_provedor = mysqli_num_rows($query_provedor);
+				mysqli_close($conexao);
+
+			 ?>
+
+			<select name="proveedor" id="proveedor">
+
+			<?php 
+
+				if($result_provedor > 0){
+					while ($provedor = mysqli_fetch_array($query_provedor)) {
+						# code...
+
+			?>
+				<option value="<?php echo $provedor['codproveedor']; ?>"><?php echo $provedor['proveedor']; ?></option>
+			<?php
+					}
+				}
+
+
+			 ?>
+
+		
+			</select>
+
+				<label for="produto">Producto</label>
+				<input type="text" name="produto" id="produto" placeholder="Nome do produto">
+
+				<label for="preco">Preço</label>
+				<input type="number" name="preco" id="preco" placeholder="preço do produto">
+
+				<label for="quantidade">Quantidade</label>
+				<input type="number" name="quantidade" id="quantidade" placeholder="Quantidade do produto">
+
+				<input type="submit" value="Guardar produto" class="btn_save">
+
+			</form>
+
+		</div>
+
+	</section>
+
+	<?php include "includes/footer.php" ?>
+
+</body>
+</html>
